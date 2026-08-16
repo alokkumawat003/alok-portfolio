@@ -10,16 +10,14 @@ Build a premium, responsive, dark-first single-page portfolio for Alok Kumawat, 
 
 ## Implemented
 - Navbar with active-section tracking, mobile menu, smooth scroll, and theme toggle.
-- Hero terminal visual, real intro/location/education details, resume CTA, and cloud/DevOps positioning.
+- Hero terminal visual, animated network graphics, live system status cards, real intro/location/education details, resume CTA, and cloud/DevOps positioning.
 - About, categorized skills with In Progress badge, experience timeline, projects, education, achievements, contact form, and footer.
 - Responsive layouts tested at desktop and 320px with no horizontal overflow.
 - Metadata, OG tags, runtime title, reduced-motion support, and descriptive data-testid attributes.
 
 ## Prioritized backlog
-- P0: Upload the real Alok-Kumawat-Resume.pdf asset.
 - P0: Add EmailJS service, template, and public key variables.
-- P1: Replace generic LinkedIn and GitHub URLs with Alok’s real profiles.
-- P2: Add real project repository and live-demo URLs.
+- P1: Add real project repository and live-demo URLs.
 
 ## Next tasks
 1. Upload the resume PDF.
