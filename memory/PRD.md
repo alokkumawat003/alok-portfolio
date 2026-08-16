@@ -10,7 +10,7 @@ Build a premium, responsive, dark-first single-page portfolio for Alok Kumawat, 
 
 ## Implemented
 - Navbar with active-section tracking, mobile menu, smooth scroll, and theme toggle.
-- Hero terminal visual, animated network graphics, live system status cards, real intro/location/education details, resume CTA, and cloud/DevOps positioning.
+- Hero terminal visual, animated network graphics, infrastructure overview panel, command ribbon, live system status cards, real intro/location/education details, resume CTA, and cloud/DevOps positioning.
 - About, categorized skills with In Progress badge, experience timeline, projects, education, achievements, contact form, and footer.
 - Responsive layouts tested at desktop and 320px with no horizontal overflow.
 - Metadata, OG tags, runtime title, reduced-motion support, and descriptive data-testid attributes.

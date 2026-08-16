@@ -21,6 +21,8 @@ export default function Hero() {
           <div className="terminal-body"><p><span className="code-muted">01</span> <span className="code-purple">const</span> <span className="code-blue">focus</span> = [</p><p className="indent"><span className="code-green">&quot;build&quot;</span>, <span className="code-green">&quot;automate&quot;</span>,</p><p className="indent"><span className="code-green">&quot;ship with confidence&quot;</span></p><p>];</p><p className="terminal-prompt"><span>➜</span> <span className="code-blue">alok</span> <span className="cursor" /></p></div>
         </div>
         <div className="cloud-chip" data-testid="cloud-status-chip"><Cloud size={17} /><span>AWS / DevOps</span><b>↗</b></div><div className="live-chip" data-testid="systems-online-status"><span className="pulse-dot" /> Systems online <strong>99.9%</strong></div><div className="signal-card" data-testid="deployment-signal-card"><span>deployments</span><strong>24</strong><i><b /><b /><b /><b /><b /><b /><b /></i></div>
+        <div className="infra-panel" data-testid="infrastructure-panel"><div className="infra-heading"><span>infra / overview</span><span className="infra-live"><i /> live</span></div><div className="infra-region"><Cloud size={14} /><span>ap-south-1</span><b>healthy</b></div><div className="infra-services"><span><i /> api-gateway</span><span><i /> cve-service</span><span><i /> mysql-db</span></div><div className="infra-meter"><span>pipeline health</span><b>87%</b><i><em /></i></div></div>
+        <div className="command-ribbon" data-testid="command-ribbon"><span>➜</span> ship --env <b>production</b> <i>⌁</i></div>
         <div className="hero-scroll"><ArrowDownRight size={15} /> scroll to explore</div>
       </div>
     </section>
