@@ -1,0 +1,3 @@
+import { Award, Brackets, TrendingUp } from "lucide-react";
+
+export default function Achievements() { return <section className="stats-band" data-testid="achievements-section"><div className="container stats-grid"><div className="stats-label"><p className="section-index">06 / signals</p><h2>Proof of<br /><span>progress.</span></h2></div><div className="stat"><Award size={20} /><strong data-testid="codechef-stat">3<span>★</span></strong><p>CodeChef rating</p></div><div className="stat"><Brackets size={20} /><strong data-testid="leetcode-stat">176<span>+</span></strong><p>LeetCode problems solved</p></div><div className="stat"><TrendingUp size={20} /><strong>∞</strong><p>Curiosity to keep learning</p></div></div></section>; }
