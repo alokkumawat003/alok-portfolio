@@ -52,7 +52,7 @@ export default function Navbar({ lightMode, onToggleTheme }) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 1.35, duration: 0.7, ease: EASE }}
         >
-          <button className="brand" onClick={() => goTo("top")} data-testid="brand-home-button">AK<span>.</span></button>
+          <button className="brand" onClick={() => goTo("top")} data-testid="brand-home-button">Alok<span>.</span></button>
           <div className="nav-links" data-testid="navigation-links">
             {links.map((link) => (
               <button key={link} className={active === link ? "active" : ""} onClick={() => goTo(link)} data-testid={`nav-${link}-button`}>

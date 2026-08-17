@@ -4,13 +4,48 @@ import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
 import { fadeUp, Magnetic, SectionHeading, staggerParent, viewportOnce } from "@/motionKit";
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const GENERIC_ERROR = "Something went wrong. Please email me directly instead.";
+
 export default function Contact() {
   const formRef = useRef(null);
+  const mountedAt = useRef(Date.now());
   const [status, setStatus] = useState("");
 
   const submit = async (event) => {
     event.preventDefault();
     const form = formRef.current;
+
+    // Honeypot: bots fill hidden fields — silently accept and drop.
+    if (form.company_website && form.company_website.value) {
+      setStatus("Message sent — I’ll be in touch soon.");
+      form.reset();
+      return;
+    }
+
+    // Timing check: real humans take a few seconds to fill the form.
+    if (Date.now() - mountedAt.current < 2500) {
+      setStatus("Please take a moment, then send your message.");
+      return;
+    }
+
+    const name = form.user_name.value.trim();
+    const email = form.user_email.value.trim();
+    const message = form.message.value.trim();
+
+    if (name.length < 2 || name.length > 80) {
+      setStatus("Please enter your name (2–80 characters).");
+      return;
+    }
+    if (!EMAIL_RE.test(email) || email.length > 120) {
+      setStatus("Please enter a valid email address.");
+      return;
+    }
+    if (message.length < 10 || message.length > 1500) {
+      setStatus("Your message should be between 10 and 1500 characters.");
+      return;
+    }
+
     const service = process.env.REACT_APP_EMAILJS_SERVICE_ID;
     const template = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
     const key = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
@@ -18,13 +53,14 @@ export default function Contact() {
       setStatus("Add EmailJS keys in frontend/.env to activate this form.");
       return;
     }
+
     setStatus("sending");
     try {
       await emailjs.sendForm(service, template, form, { publicKey: key });
       setStatus("Message sent — I’ll be in touch soon.");
       form.reset();
     } catch {
-      setStatus("Something went wrong. Please email me directly instead.");
+      setStatus(GENERIC_ERROR);
     }
   };
 
@@ -44,10 +80,12 @@ export default function Contact() {
             <a href="https://github.com/alokkumawat003" target="_blank" rel="noreferrer" data-testid="github-link"><Github size={18} /></a>
           </div>
         </motion.div>
-        <motion.form className="contact-form" variants={fadeUp} ref={formRef} onSubmit={submit} data-testid="contact-form">
-          <label>Your name<input name="user_name" required placeholder="How should I call you?" data-testid="contact-name-input" /></label>
-          <label>Your email<input name="user_email" type="email" required placeholder="you@company.com" data-testid="contact-email-input" /></label>
-          <label>Message<textarea name="message" required rows="4" placeholder="Tell me a little about the opportunity..." data-testid="contact-message-input" /></label>
+        <motion.form className="contact-form" variants={fadeUp} ref={formRef} onSubmit={submit} noValidate data-testid="contact-form">
+          <label>Your name<input name="user_name" required minLength={2} maxLength={80} placeholder="How should I call you?" data-testid="contact-name-input" /></label>
+          <label>Your email<input name="user_email" type="email" required maxLength={120} placeholder="you@company.com" data-testid="contact-email-input" /></label>
+          <label>Message<textarea name="message" required minLength={10} maxLength={1500} rows="4" placeholder="Tell me a little about the opportunity..." data-testid="contact-message-input" /></label>
+          {/* Honeypot — hidden from humans, catches bots */}
+          <input className="hp-field" type="text" name="company_website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
           <Magnetic as="button" className="button button-primary submit-button" type="submit" disabled={status === "sending"} data-testid="contact-submit-button">
             {status === "sending" ? "Sending..." : <>Send message <Send size={15} /></>}
           </Magnetic>

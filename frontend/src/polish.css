@@ -66,3 +66,25 @@ main,.footer{position:relative;z-index:1}
 /* ── guards ── */
 @media(max-width:800px){.blob{width:320px;height:320px;filter:blur(65px)}.blob-c{display:none}}
 @media(prefers-reduced-motion:reduce){.blob,.hero::before,.type-caret,.hero-scroll svg,.progress-line i,.tl-dot::after,.stat-star svg,.skill-card.learning .progress-badge{animation:none!important}.cursor-dot,.cursor-ring{display:none}}
+
+/* ── intro loader progress ── */
+.intro-stack{display:grid;gap:24px;justify-items:center}
+.intro-track{width:180px;height:3px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}
+.intro-bar{display:block;height:100%;width:100%;background:var(--grad);transform-origin:left}
+
+/* ── back-to-top floating button ── */
+.back-to-top{position:fixed;right:24px;bottom:24px;z-index:60;width:48px;height:48px;border-radius:50%;border:1px solid rgba(124,124,255,.35);background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);color:var(--ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 18px 44px -14px rgba(0,0,0,.7);transition:border-color .3s ease,color .3s ease}
+.back-to-top:hover{border-color:var(--acc1);color:var(--acc1)}
+.back-to-top:active{transform:scale(.9)}
+@media(max-width:480px){.back-to-top{right:16px;bottom:16px;width:44px;height:44px}}
+
+/* ── honeypot (spam trap, hidden from humans) ── */
+.hp-field{position:absolute!important;left:-9999px!important;top:-9999px!important;width:1px;height:1px;opacity:0;pointer-events:none}
+
+/* ── 404 page ── */
+.notfound{min-height:100vh;display:grid;place-items:center;padding:120px 24px;position:relative;z-index:1}
+.notfound-inner{max-width:560px;text-align:center;display:flex;flex-direction:column;align-items:center}
+.notfound-inner .eyebrow{margin-bottom:30px}
+.notfound-title{font:700 clamp(2.8rem,9vw,5.4rem)/1 'Space Grotesk';letter-spacing:-.04em;margin:0 0 22px}
+.notfound-copy{color:var(--muted);font-size:16px;line-height:1.8;max-width:440px;margin:0 0 26px}
+.notfound-terminal{display:inline-flex;gap:9px;align-items:center;font:11px 'DM Mono';color:var(--acc3);border:1px solid var(--line);background:var(--surface);padding:9px 15px;border-radius:999px;margin-bottom:34px}

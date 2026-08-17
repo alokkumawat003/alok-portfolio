@@ -14,9 +14,14 @@ export default function IntroLoader() {
     <AnimatePresence>
       {show && (
         <motion.div className="intro-loader" data-testid="intro-loader" exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: EASE }}>
-          <motion.span className="intro-name" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: EASE }}>
-            Alok<span>.</span>
-          </motion.span>
+          <div className="intro-stack">
+            <motion.span className="intro-name" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: EASE }}>
+              Alok<span>.</span>
+            </motion.span>
+            <span className="intro-track" data-testid="intro-progress">
+              <motion.span className="intro-bar" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.25, ease: "easeInOut" }} />
+            </span>
+          </div>
         </motion.div>
       )}
     </AnimatePresence>

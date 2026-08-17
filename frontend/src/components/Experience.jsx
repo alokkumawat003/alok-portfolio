@@ -26,7 +26,7 @@ export default function Experience() {
             initial={{ opacity: 0, x: reduce ? 0 : index % 2 ? 56 : -56 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true, amount: 0.2 }}
-            transition={{ duration: 0.8, ease: EASE }}
+            transition={{ duration: 0.75, ease: EASE }}
             data-testid={`experience-item-${index + 1}`}
           >
             <motion.span className="tl-dot" initial={{ scale: 0 }} whileInView={{ scale: 1 }} viewport={{ once: true, amount: 0.4 }} transition={{ type: "spring", stiffness: 320, damping: 15, delay: 0.15 }} />

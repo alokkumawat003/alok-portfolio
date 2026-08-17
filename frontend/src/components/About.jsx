@@ -11,7 +11,7 @@ const facts = [
 export default function About() {
   return (
     <section id="about" className="section container" data-testid="about-section">
-      <SectionHeading index="01 / about">From features<br /><span>to infrastructure.</span></SectionHeading>
+      <SectionHeading index="01 / about" compact>From features<br /><span>to infrastructure.</span></SectionHeading>
       <motion.div className="about-grid" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
         <motion.div className="about-lead" variants={fadeUp}>
           <p className="large-copy">I started with the interface, learned the backend, and now I’m moving closer to the systems that make everything possible.</p>
