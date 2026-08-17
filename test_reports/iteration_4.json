@@ -1,0 +1,45 @@
+{
+  "summary": "Frontend-only Playwright testing of the polished portfolio (animation/polish layer). Verified page load, watermark removal, hero animations, scroll progress, navbar behavior, mobile drawer, timeline, projects, achievements countup, contact form fallback, theme toggle, and responsive widths. 2 clear bugs found: broken typewriter cycling and horizontal overflow at every viewport due to background blobs + custom cursor initial off-screen position.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Hero.jsx useTypewriter hook",
+        "issue": "Typing role never cycles. `data-testid=hero-typing-role` remains stuck on the first role ('Java Full Stack Developer') indefinitely (verified over 10s). Root cause: hook initializes `char = words[0].length` and then the first tick does `char += 1` (making char = length+1), so the condition `char === current.length` never becomes true, and the deleting phase never triggers. Fix: initialize `char = words[0].length - 1` and start with `deleting=false` (or start with `deleting=true` and `char = words[0].length`), or change the trigger to `char >= current.length`.",
+        "selector": "[data-testid='hero-typing-role']",
+        "priority": "HIGH"
+      },
+      {
+        "component": "BackgroundFX + CustomCursor",
+        "issue": "Horizontal overflow at every tested viewport (320/375/390/768/1024/1440 → scrollWidth exceeds innerWidth by ~13-30px). Two culprits identified via bounding-rect scan: (1) `.blob.blob-a` and `.blob.blob-b` in BackgroundFX extend outside the viewport (e.g. blob-b right=1650 at width 1440). (2) `.cursor-dot` and `.cursor-ring` render at negative left (~-100px) before first mouse move. Fix options: give the shell/main a wrapping `overflow-x: hidden`, translate blobs with transforms instead of positive width overflow, and initialize custom cursor position off-screen using transform without expanding layout (e.g. fixed at 0,0 with translate3d(-9999px,-9999px,0) — but ensure it doesn't participate in layout width).",
+        "selector": ".blob, [data-testid='custom-cursor-dot'], .cursor-ring",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Achievements.jsx",
+        "issue": "Section is rendered with `data-testid='achievements-section'` but has no `id='achievements'`. Not currently linked from navbar links list (['about','skills','experience','projects','contact']), so no functional break, but inconsistent with other sections and prevents deep-linking / IntersectionObserver spy if 'achievements' is ever added to the nav.",
+        "selector": "section.stats-band",
+        "priority": "LOW"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix useTypewriter logic in Hero.jsx so the role text cycles between the three ROLES.",
+    "Prevent horizontal scroll: add `overflow-x: hidden` to the portfolio shell (or html/body) and/or clip BackgroundFX blobs; initialize CustomCursor position without pushing layout past the viewport.",
+    "(Optional) Add id='achievements' to the Achievements <section> for consistency and future nav linking."
+  ],
+  "critical_code_review_comments": [
+    "useTypewriter: guard the equality with `>=`, or align initial char/deleting state so the first tick lands on transition."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "~80%"},
+  "seed_data_creation": "None",
+  "should_call_test_agent_after_fix": true,
+  "should_main_agent_self_test": false,
+  "test_credentials": "None (static frontend)",
+  "context_for_next_testing_agent": "Verified working: title 'Alok Kumawat · Java / Cloud / DevOps'; no Emergent watermark (emergent-main.js removed, 0 matching elements); scroll indicator visible; resume href points to the .pdf; scroll-progress-bar present; navbar gains 'nav-scrolled' after scroll >24px; nav-projects-button smooth-scroll works and lazy Projects section loaded (12 project-related testids); Experience timeline has 3 experience-item-* + tl-progress; Projects has 4 project cards; codechef-stat=3★ and leetcode-stat=176+ after scrolling into view; Contact form with 3 inputs, submit shows fallback text containing 'EmailJS'; theme-toggle-button adds/removes 'light' class on <html>; mobile-menu-button opens mobile-drawer at 390px and mobile-nav-skills-button navigates and closes drawer. FAILING: typewriter never cycles; horizontal overflow across all tested widths (root causes identified above).",
+  "rca_of_the_issue": "Typewriter: `char` is initialized to length and increments before the length check, so `char === length` is never true and the state never transitions to deleting. Overflow: BackgroundFX .blob elements are absolutely positioned with widths that extend beyond viewport bounds without a parent clipping context; CustomCursor sets its position to negative viewport coordinates on mount, contributing to document width."
+}
