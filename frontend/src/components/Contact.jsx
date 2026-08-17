@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { motion } from "framer-motion";
 import { Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
-import { fadeUp, staggerParent, viewportOnce } from "@/motionKit";
+import { fadeUp, Magnetic, SectionHeading, staggerParent, viewportOnce } from "@/motionKit";
 
 export default function Contact() {
   const formRef = useRef(null);
@@ -32,10 +32,7 @@ export default function Contact() {
     <section id="contact" className="section contact-section" data-testid="contact-section">
       <motion.div className="container contact-grid" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
         <motion.div variants={fadeUp}>
-          <div className="section-heading compact">
-            <p className="section-index">07 / contact</p>
-            <h2>Let’s build<br /><span>what’s next.</span></h2>
-          </div>
+          <SectionHeading index="07 / contact" compact>Let’s build<br /><span>what’s next.</span></SectionHeading>
           <p className="contact-copy">Open to conversations about Java, Cloud, DevOps, and the opportunities in between.</p>
           <div className="contact-details">
             <a href="mailto:alokkumawat2004@gmail.com" data-testid="email-link"><Mail size={17} /> alokkumawat2004@gmail.com</a>
@@ -51,9 +48,9 @@ export default function Contact() {
           <label>Your name<input name="user_name" required placeholder="How should I call you?" data-testid="contact-name-input" /></label>
           <label>Your email<input name="user_email" type="email" required placeholder="you@company.com" data-testid="contact-email-input" /></label>
           <label>Message<textarea name="message" required rows="4" placeholder="Tell me a little about the opportunity..." data-testid="contact-message-input" /></label>
-          <button className="button button-primary submit-button" type="submit" disabled={status === "sending"} data-testid="contact-submit-button">
+          <Magnetic as="button" className="button button-primary submit-button" type="submit" disabled={status === "sending"} data-testid="contact-submit-button">
             {status === "sending" ? "Sending..." : <>Send message <Send size={15} /></>}
-          </button>
+          </Magnetic>
           {status && <p className={`form-status ${status.startsWith("Message") ? "success" : ""}`} role="status" data-testid="contact-form-status">{status}</p>}
         </motion.form>
       </motion.div>

@@ -1,7 +1,7 @@
 import Tilt from "react-parallax-tilt";
 import { motion, useReducedMotion } from "framer-motion";
 import { ArrowUpRight, Github, Layers3 } from "lucide-react";
-import { fadeUp, staggerParent, useHoverCapable, viewportOnce } from "@/motionKit";
+import { fadeUp, SectionHeading, staggerParent, useHoverCapable, viewportOnce } from "@/motionKit";
 
 const projects = [
   ["01", "Vulnerability Management System", "Spring Boot CVE tracker with role-based access, UUID generation, and JSON handling in MySQL", "Spring Boot · MySQL", "cyan"],
@@ -19,10 +19,7 @@ export default function Projects() {
     <section id="projects" className="section section-tint" data-testid="projects-section">
       <div className="container">
         <motion.div className="projects-head" variants={fadeUp} initial="hidden" whileInView="show" viewport={viewportOnce}>
-          <div className="section-heading compact">
-            <p className="section-index">04 / selected work</p>
-            <h2>Small builds,<br /><span>real intent.</span></h2>
-          </div>
+          <SectionHeading index="04 / selected work" compact>Small builds,<br /><span>real intent.</span></SectionHeading>
           <p className="section-note">A selection of systems and interfaces I’ve built while growing from full-stack development toward the cloud.</p>
         </motion.div>
         <motion.div className="projects-grid" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
@@ -31,7 +28,7 @@ export default function Projects() {
               <Tilt tiltEnable={tiltOn} tiltMaxAngleX={6} tiltMaxAngleY={6} scale={tiltOn ? 1.02 : 1} transitionSpeed={1400} glareEnable={false} style={{ height: "100%" }}>
                 <article className={`project-card ${color}`} data-testid={`project-${number}`}>
                   <div className="project-top"><span>{number}</span><Layers3 size={20} /></div>
-                  <div><h3>{title}</h3><p>{description}</p></div>
+                  <div><h3>{title}</h3><p className="project-desc">{description}</p></div>
                   <div className="project-bottom">
                     <span>{tags}</span>
                     <div className="project-links">

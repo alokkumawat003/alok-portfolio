@@ -11,18 +11,15 @@ Build a premium, responsive, dark-first single-page portfolio for Alok Kumawat, 
 - EmailJS browser integration prepared through @emailjs/browser and env vars (still unconfigured — graceful fallback).
 
 ## Implemented
-- Core portfolio: Navbar, Hero cloud cockpit, About, Skills, Experience, Projects, Education, Achievements, Contact (EmailJS fallback), Footer with real content, resume PDF CTA, LinkedIn/GitHub links.
-- 2026-06 premium animation upgrade (agent-tested, iteration_4 + self-verified fixes):
-  - Emergent watermark script removed from index.html.
-  - Hero: staggered word reveal, typewriter cycling 3 role titles, mouse parallax layers (hover-capable devices only), animated mesh gradient, bouncing scroll indicator.
-  - Global: scroll-progress bar, whileInView fade+slide reveals with staggered children in every section, floating blurred gradient blobs, custom cursor (desktop only, hidden until first move).
-  - Navbar: glassmorphism intensifying on scroll (nav-scrolled), animated layoutId pill under active link, animated mobile drawer (mobile-nav-*-button testids).
-  - Skills: glow gradient-border hover cards, icon hover motion, pulsing "In progress" badge on Cloud & DevOps.
-  - Experience: vertical timeline with scroll-linked line draw (useScroll scaleY), pulsing dots popping in, alternating left/right card slide-ins.
-  - Projects: 3D tilt cards (disabled on touch/reduced-motion), hover overlay with tech tag chips, shadow-grow via opacity.
-  - Achievements: count-up stats (3★, 176+), sparkling star icon; section id="achievements".
-  - Micro-interactions: button hover glow + press scale, link underline draw-in, contact input underline-fill focus states, smooth theme fade.
-  - Guardrails: transform/opacity-only animations, prefers-reduced-motion CSS + MotionConfig, touch-device disabling for tilt/parallax/cursor, html overflow-x hidden; no horizontal overflow at 320–1440px.
+- Core portfolio: Navbar, Hero cockpit, About, Skills, Experience, Projects, Education, Achievements, Contact (EmailJS fallback), Footer with real content, resume PDF CTA, LinkedIn/GitHub links. Emergent watermark removed.
+- 2026-06 FULL VISUAL REDESIGN (agent-tested iteration_5, ~98% pass; back-to-top fix self-verified):
+  - Design system: near-black #0a0a0f, electric blue→violet gradient (#5b8cff→#a855f7) + cyan (#22d3ee), Space Grotesk oversized clamp headings, grain SVG-noise overlay, animated mesh + drifting gradient blobs, glassmorphism throughout, ease-out-expo cubic-bezier(.16,1,.3,1).
+  - Page-load intro animation (IntroLoader.jsx, 1.5s "Alok." scale/fade, skipped on reduced motion).
+  - Hero: character-level gradient name reveal (per-char background-clip fix), word-stagger statement, typewriter roles, mouse parallax, floating icon chips with independent y-oscillation, magnetic CTA buttons with cursor-following glow (motionKit Magnetic).
+  - Navbar: floating glass pill (fixed, centered, rounded), shrinks on scroll, layoutId active pill, full-screen mobile overlay menu with staggered oversized links + body scroll lock.
+  - Sections: SectionHeading component with gradient span + self-drawing accent line; glow gradient-border cards; scroll-drawn timeline; tilt project cards with overlays; count-up stats; glass contact form with focus glow.
+  - Guardrails intact: transform/opacity-only, prefers-reduced-motion + MotionConfig, touch disabling for tilt/parallax/magnetic/cursor, lazy below-fold sections, zero overflow 320–1440px. Footer back-to-top uses programmatic scrollTo.
+  - Libraries: framer-motion 11.18, react-parallax-tilt 1.7, react-countup 6.5 (all in package.json).
 
 ## Prioritized backlog
 - P0: Add EmailJS service, template, and public key variables (user must supply).

@@ -1,17 +1,28 @@
 import { useEffect, useState } from "react";
 import { motion, useMotionValue, useReducedMotion, useSpring, useTransform } from "framer-motion";
-import { ArrowUpRight, ChevronDown, Cloud, Download, MapPin, Terminal } from "lucide-react";
-import { useHoverCapable } from "@/motionKit";
+import { ChevronDown, Cloud, Code2, Download, GitBranch, MapPin, Send, Server, Terminal } from "lucide-react";
+import { EASE, Magnetic, useHoverCapable } from "@/motionKit";
 
 const ROLES = ["Java Full Stack Developer", "Aspiring DevOps Engineer", "Cloud Enthusiast"];
-const containerV = { hidden: {}, show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } } };
-const itemV = { hidden: { opacity: 0, y: 26 }, show: { opacity: 1, y: 0, transition: { duration: 0.7, ease: [0.22, 1, 0.36, 1] } } };
-const lineV = { hidden: {}, show: { transition: { staggerChildren: 0.06 } } };
-const wordV = { hidden: { opacity: 0, y: "0.7em" }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } };
+const containerV = { hidden: {}, show: { transition: { staggerChildren: 0.11, delayChildren: 1.5 } } };
+const itemV = { hidden: { opacity: 0, y: 28 }, show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE } } };
+const lineV = { hidden: {}, show: { transition: { staggerChildren: 0.04 } } };
+const charV = { hidden: { opacity: 0, y: "0.55em" }, show: { opacity: 1, y: 0, transition: { duration: 0.55, ease: EASE } } };
+const wordV = { hidden: { opacity: 0, y: "0.7em" }, show: { opacity: 1, y: 0, transition: { duration: 0.6, ease: EASE } } };
 
+const Chars = ({ text, grad }) => text.split("").map((c, i) => (
+  <motion.span className={`char ${grad ? "char-grad" : ""}`} variants={charV} key={`${c}-${i}`}>{c === " " ? "\u00A0" : c}</motion.span>
+));
 const Words = ({ text }) => text.split(" ").map((word, index) => (
   <motion.span className="word" variants={wordV} key={`${word}-${index}`}>{word}</motion.span>
 ));
+
+const floaters = [
+  { Icon: Cloud, className: "float-a", dur: 6 },
+  { Icon: Code2, className: "float-b", dur: 7.4 },
+  { Icon: Server, className: "float-c", dur: 5.4 },
+  { Icon: GitBranch, className: "float-d", dur: 8.2 },
+];
 
 function useTypewriter(words) {
   const reduce = useReducedMotion();
@@ -29,7 +40,7 @@ function useTypewriter(words) {
       else if (deleting && char === 0) { deleting = false; word = (word + 1) % words.length; delay = 380; }
       timer = setTimeout(tick, delay);
     };
-    timer = setTimeout(tick, 1400);
+    timer = setTimeout(tick, 2600);
     return () => clearTimeout(timer);
   }, [reduce, words]);
   return text;
@@ -58,22 +69,28 @@ export default function Hero() {
 
   return (
     <section id="top" className="hero container" data-testid="hero-section" onMouseMove={parallaxOn ? onMove : undefined}>
+      {floaters.map(({ Icon, className, dur }) => (
+        <motion.span className={`float-el ${className}`} key={className} aria-hidden="true" animate={reduce ? undefined : { y: [0, -16, 0] }} transition={{ duration: dur, repeat: Infinity, ease: "easeInOut" }}>
+          <Icon size={17} />
+        </motion.span>
+      ))}
       <motion.div className="hero-copy" variants={containerV} initial="hidden" animate="show">
         <motion.div className="eyebrow" variants={itemV}><span className="status-dot" /> Available for full-time opportunities</motion.div>
         <motion.p className="hero-kicker" variants={itemV} data-testid="hero-typing-role">{typed}<span className="type-caret" /></motion.p>
         <motion.h1 data-testid="hero-heading" variants={lineV}>
-          <Words text="Building reliable systems" />
-          <br />
-          <em><Words text="for the next layer." /></em>
+          <Chars text="Alok" />{"\u00A0"}<Chars text="Kumawat" grad />
         </motion.h1>
-        <motion.p className="hero-intro" variants={itemV} data-testid="hero-intro">I’m Alok Kumawat — a Java Full Stack Developer transitioning into Cloud &amp; DevOps, with a bias for clean architecture and useful products.</motion.p>
+        <motion.p className="hero-statement" variants={lineV}>
+          <Words text="Building reliable systems" /><em><Words text="for the next layer." /></em>
+        </motion.p>
+        <motion.p className="hero-intro" variants={itemV} data-testid="hero-intro">I’m a Java Full Stack Developer transitioning into Cloud &amp; DevOps, with a bias for clean architecture and useful products.</motion.p>
         <motion.div className="hero-ctas" variants={itemV}>
-          <a className="button button-primary" href="https://customer-assets-7cd3h4nn.emergentagent.net/job_devops-journey-alok/artifacts/ba8cth48_Alok%20Kumawat%20Resume.pdf" target="_blank" rel="noreferrer" data-testid="download-resume-button"><Download size={16} /> Download resume</a>
-          <a className="button button-ghost" href="#contact" data-testid="hero-contact-button">Let’s connect <ArrowUpRight size={16} /></a>
+          <Magnetic className="button button-primary" href="https://customer-assets-7cd3h4nn.emergentagent.net/job_devops-journey-alok/artifacts/ba8cth48_Alok%20Kumawat%20Resume.pdf" target="_blank" rel="noreferrer" data-testid="download-resume-button"><Download size={16} /> Download resume</Magnetic>
+          <Magnetic className="button button-ghost" href="#contact" data-testid="hero-contact-button">Let’s connect <Send size={15} /></Magnetic>
         </motion.div>
         <motion.div className="hero-meta" variants={itemV}><span><MapPin size={14} /> Jaipur, Rajasthan</span><span><Terminal size={14} /> B.Tech CSE · 2026</span></motion.div>
       </motion.div>
-      <motion.div className="hero-visual" aria-label="Cloud infrastructure illustration" data-testid="hero-visual" initial={{ opacity: 0, y: 28 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.9, delay: 0.4, ease: [0.22, 1, 0.36, 1] }}>
+      <motion.div className="hero-visual" aria-label="Cloud infrastructure illustration" data-testid="hero-visual" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.95, delay: 1.9, ease: EASE }}>
         <motion.div className="parallax-layer" style={{ x: farX, y: farY }}>
           <div className="orb orb-one" /><div className="orb orb-two" /><div className="grid-horizon" /><div className="network-line line-a" /><div className="network-line line-b" /><div className="network-line line-c" /><div className="network-node node-a" /><div className="network-node node-b" /><div className="network-node node-c" /><div className="network-node node-d" />
         </motion.div>

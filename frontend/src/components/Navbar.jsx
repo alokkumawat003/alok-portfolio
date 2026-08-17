@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Menu, Moon, Sun, X } from "lucide-react";
+import { EASE } from "@/motionKit";
 
 const links = ["about", "skills", "experience", "projects", "contact"];
 
@@ -10,7 +11,7 @@ export default function Navbar({ lightMode, onToggleTheme }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
@@ -31,40 +32,60 @@ export default function Navbar({ lightMode, onToggleTheme }) {
     return () => { clearInterval(timer); observer.disconnect(); };
   }, []);
 
+  useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [open]);
+
   const goTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
     setOpen(false);
   };
 
   return (
-    <header className={`nav-wrap ${scrolled ? "nav-scrolled" : ""}`} data-testid="site-navbar">
-      <nav className="nav container" aria-label="Main navigation">
-        <button className="brand" onClick={() => goTo("top")} data-testid="brand-home-button">
-          AK<span>.</span>
-        </button>
-        <div className="nav-links" data-testid="navigation-links">
-          {links.map((link) => (
-            <button key={link} className={active === link ? "active" : ""} onClick={() => goTo(link)} data-testid={`nav-${link}-button`}>
-              {link}
-              {active === link && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
+    <header data-testid="site-navbar">
+      <div className="nav-float-wrap">
+        <motion.nav
+          className={`nav-pill-bar ${scrolled ? "shrunk" : ""}`}
+          aria-label="Main navigation"
+          initial={{ y: -26, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 1.35, duration: 0.7, ease: EASE }}
+        >
+          <button className="brand" onClick={() => goTo("top")} data-testid="brand-home-button">AK<span>.</span></button>
+          <div className="nav-links" data-testid="navigation-links">
+            {links.map((link) => (
+              <button key={link} className={active === link ? "active" : ""} onClick={() => goTo(link)} data-testid={`nav-${link}-button`}>
+                {active === link && <motion.span layoutId="nav-active-pill" className="nav-active-pill" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
+                <span>{link}</span>
+              </button>
+            ))}
+          </div>
+          <div className="nav-actions">
+            <button className="icon-button" onClick={onToggleTheme} aria-label="Toggle light mode" data-testid="theme-toggle-button">
+              {lightMode ? <Moon size={17} /> : <Sun size={17} />}
             </button>
-          ))}
-        </div>
-        <div className="nav-actions">
-          <button className="icon-button" onClick={onToggleTheme} aria-label="Toggle light mode" data-testid="theme-toggle-button">
-            {lightMode ? <Moon size={17} /> : <Sun size={17} />}
-          </button>
-          <button className="menu-button icon-button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" data-testid="mobile-menu-button">
-            {open ? <X size={19} /> : <Menu size={19} />}
-          </button>
-        </div>
-      </nav>
+            <button className="menu-button icon-button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" data-testid="mobile-menu-button">
+              {open ? <X size={19} /> : <Menu size={19} />}
+            </button>
+          </div>
+        </motion.nav>
+      </div>
       <AnimatePresence>
         {open && (
-          <motion.div className="mobile-drawer" data-testid="mobile-drawer" initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
+          <motion.div className="menu-overlay" data-testid="mobile-drawer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: EASE }}>
             {links.map((link, index) => (
-              <motion.button key={link} className={active === link ? "active" : ""} onClick={() => goTo(link)} initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.05 + index * 0.05 }} data-testid={`mobile-nav-${link}-button`}>
-                {link}
+              <motion.button
+                key={link}
+                className={`overlay-link ${active === link ? "active" : ""}`}
+                onClick={() => goTo(link)}
+                initial={{ opacity: 0, y: 44 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 20 }}
+                transition={{ delay: 0.06 + index * 0.07, duration: 0.55, ease: EASE }}
+                data-testid={`mobile-nav-${link}-button`}
+              >
+                <i>0{index + 1}</i>{link}
               </motion.button>
             ))}
           </motion.div>

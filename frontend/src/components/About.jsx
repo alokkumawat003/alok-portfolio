@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { ArrowUpRight, Code2, GraduationCap, ShieldCheck } from "lucide-react";
-import { fadeUp, staggerParent, viewportOnce } from "@/motionKit";
+import { fadeUp, SectionHeading, staggerParent, viewportOnce } from "@/motionKit";
 
 const facts = [
   [Code2, "3★", "CodeChef rating"],
@@ -11,10 +11,7 @@ const facts = [
 export default function About() {
   return (
     <section id="about" className="section container" data-testid="about-section">
-      <motion.div className="section-heading" variants={fadeUp} initial="hidden" whileInView="show" viewport={viewportOnce}>
-        <p className="section-index">01 / about</p>
-        <h2>From features<br /><span>to infrastructure.</span></h2>
-      </motion.div>
+      <SectionHeading index="01 / about">From features<br /><span>to infrastructure.</span></SectionHeading>
       <motion.div className="about-grid" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
         <motion.div className="about-lead" variants={fadeUp}>
           <p className="large-copy">I started with the interface, learned the backend, and now I’m moving closer to the systems that make everything possible.</p>

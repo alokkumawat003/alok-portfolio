@@ -10,6 +10,7 @@ import Skills from "@/components/Skills";
 import ScrollProgress from "@/components/ScrollProgress";
 import BackgroundFX from "@/components/BackgroundFX";
 import CustomCursor from "@/components/CustomCursor";
+import IntroLoader from "@/components/IntroLoader";
 
 const Experience = lazy(() => import("@/components/Experience"));
 const Projects = lazy(() => import("@/components/Projects"));
@@ -29,6 +30,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="portfolio-shell">
+        <IntroLoader />
         <ScrollProgress />
         <BackgroundFX />
         <CustomCursor />
