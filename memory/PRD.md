@@ -21,6 +21,14 @@ Build a premium, responsive, dark-first single-page portfolio for Alok Kumawat, 
   - Guardrails intact: transform/opacity-only, prefers-reduced-motion + MotionConfig, touch disabling for tilt/parallax/magnetic/cursor, lazy below-fold sections, zero overflow 320–1440px. Footer back-to-top uses programmatic scrollTo.
   - Libraries: framer-motion 11.18, react-parallax-tilt 1.7, react-countup 6.5 (all in package.json).
 
+## Security (2026-06 audit — CONDITIONAL PASS → fixes applied, verified iteration_6 at 100%)
+- Frontend clean: no XSS sinks, all target=_blank use rel=noreferrer, no secrets in code/build; PostHog key is a public client key.
+- SEC-001 fixed: removed unused POST/GET /api/status routes (unauthenticated unbounded DB writes); backend is now a GET /api/ health stub only.
+- SEC-002 fixed: CORS allow_credentials=False, methods limited to GET; verified no allow-credentials header emitted (ingress adds its own wildcard headers, safe without credentials).
+- Hardening: GENERATE_SOURCEMAP=false in frontend/.env (0 .map files in build).
+- Security regression suite: /app/backend/tests/backend_test.py (4 pytest tests).
+- Deferred (low): explicit CORS origin pinning, security headers (CSP/HSTS) at ingress, silencing 2 favicon-type 404s.
+
 ## Prioritized backlog
 - P0: Add EmailJS service, template, and public key variables (user must supply).
 - P1: Add real project repository and live-demo URLs (currently placeholder #contact).
