@@ -1,58 +1,34 @@
-"""Security regression tests for portfolio backend.
+"""Security and behavior regression tests for the portfolio health API."""
 
-Verifies:
-- SEC-001: /api/status routes removed (no anon DB writes)
-- SEC-002: CORS no longer sends allow-credentials: true
-- Health endpoint still returns 200 ok
-"""
-import os
-from pathlib import Path
+from fastapi.testclient import TestClient
 
-import pytest
-import requests
-from dotenv import dotenv_values
-
-frontend_env = dotenv_values("/app/frontend/.env")
-BASE_URL = (os.environ.get("REACT_APP_BACKEND_URL")
-            or frontend_env.get("REACT_APP_BACKEND_URL"))
-assert BASE_URL, "REACT_APP_BACKEND_URL missing"
-BASE_URL = BASE_URL.rstrip("/")
+from server import app
 
 
-# ---------- Health ----------
-class TestHealth:
-    def test_root_health_ok(self):
-        r = requests.get(f"{BASE_URL}/api/", timeout=15)
-        assert r.status_code == 200
-        assert r.json() == {"status": "ok"}
+client = TestClient(app)
 
 
-# ---------- SEC-001: /status routes removed ----------
-class TestStatusRoutesRemoved:
-    def test_post_status_returns_404(self):
-        r = requests.post(
-            f"{BASE_URL}/api/status",
-            json={"client_name": "TEST_hacker"},
-            timeout=15,
-        )
-        assert r.status_code == 404, f"unexpected {r.status_code}: {r.text[:200]}"
+def test_health_endpoint_returns_ok() -> None:
+    response = client.get("/api/")
 
-    def test_get_status_returns_404(self):
-        r = requests.get(f"{BASE_URL}/api/status", timeout=15)
-        assert r.status_code == 404
+    assert response.status_code == 200
+    assert response.json() == {"status": "ok"}
 
 
-# ---------- SEC-002: CORS no allow-credentials ----------
-class TestCorsCredentialsDisabled:
-    def test_cross_origin_get_no_allow_credentials(self):
-        r = requests.get(
-            f"{BASE_URL}/api/",
-            headers={"Origin": "https://evil.example.com"},
-            timeout=15,
-        )
-        assert r.status_code == 200
-        # lower-cased header names in requests
-        acac = r.headers.get("access-control-allow-credentials")
-        assert acac is None or acac.lower() != "true", (
-            f"allow-credentials must not be true, got: {acac}"
-        )
+def test_removed_status_routes_are_not_available() -> None:
+    assert client.get("/api/status").status_code == 404
+    assert client.post("/api/status", json={"client_name": "test"}).status_code == 404
+
+
+def test_cross_origin_response_has_no_cors_headers() -> None:
+    response = client.get("/api/", headers={"Origin": "https://evil.example.com"})
+
+    assert response.status_code == 200
+    assert "access-control-allow-origin" not in response.headers
+    assert "access-control-allow-credentials" not in response.headers
+
+
+def test_interactive_api_documentation_is_disabled() -> None:
+    assert client.get("/docs").status_code == 404
+    assert client.get("/redoc").status_code == 404
+    assert client.get("/openapi.json").status_code == 404

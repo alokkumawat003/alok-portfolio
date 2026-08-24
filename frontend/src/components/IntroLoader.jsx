@@ -3,27 +3,36 @@ import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { EASE } from "@/motionKit";
 
 export default function IntroLoader() {
-  const reduce = useReducedMotion();
-  const [show, setShow] = useState(true);
+  const reduced = useReducedMotion();
+  const [visible, setVisible] = useState(!reduced);
+
   useEffect(() => {
-    if (reduce) { setShow(false); return undefined; }
-    const t = setTimeout(() => setShow(false), 1500);
-    return () => clearTimeout(t);
-  }, [reduce]);
+    if (reduced) {
+      setVisible(false);
+      return undefined;
+    }
+    const timer = window.setTimeout(() => setVisible(false), 820);
+    return () => window.clearTimeout(timer);
+  }, [reduced]);
+
   return (
     <AnimatePresence>
-      {show && (
-        <motion.div className="intro-loader" data-testid="intro-loader" exit={{ opacity: 0 }} transition={{ duration: 0.55, ease: EASE }}>
-          <div className="intro-stack">
-            <motion.span className="intro-name" initial={{ opacity: 0, scale: 0.85 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.8, ease: EASE }}>
-              Alok<span>.</span>
-            </motion.span>
-            <span className="intro-track" data-testid="intro-progress">
-              <motion.span className="intro-bar" initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 1.25, ease: "easeInOut" }} />
-            </span>
+      {visible ? (
+        <motion.div
+          className="field-loader"
+          data-testid="intro-loader"
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, scale: 1.025 }}
+          transition={{ duration: 0.46, ease: EASE }}
+        >
+          <div className="loader-runtime-head"><span>AK//RUNTIME</span><span>PORTFOLIO.2026</span></div>
+          <div className="loader-runtime-core"><b>BOOTING<br />IDENTITY<br />SYSTEM</b><span>ALOK_KUMAWAT</span></div>
+          <div className="loader-runtime-foot">
+            <span>MEMORY / READY</span><span>ROUTES / MOUNTED</span><span>GRAPHICS / ADAPTIVE</span>
           </div>
+          <span className="loader-track" data-testid="intro-progress"><motion.i initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ duration: 0.68, ease: EASE }} /></span>
         </motion.div>
-      )}
+      ) : null}
     </AnimatePresence>
   );
 }

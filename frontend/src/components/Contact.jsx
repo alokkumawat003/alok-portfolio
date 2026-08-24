@@ -1,97 +1,140 @@
 import { useRef, useState } from "react";
 import emailjs from "@emailjs/browser";
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
-import { fadeUp, Magnetic, SectionHeading, staggerParent, viewportOnce } from "@/motionKit";
+import { ArrowUpRight, Github, Linkedin, Mail, MapPin, Phone, Send } from "lucide-react";
+import { PROFILE } from "@/data/portfolio";
+import { ChapterHeading, Magnetic, reveal, stagger, viewportOnce } from "@/motionKit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const GENERIC_ERROR = "Something went wrong. Please email me directly instead.";
+const EMAILJS_OK = 200;
+const INITIAL_STATUS = { type: "idle", message: "" };
+
+const errorStatus = (message) => ({ type: "error", message });
 
 export default function Contact() {
   const formRef = useRef(null);
-  const mountedAt = useRef(Date.now());
-  const [status, setStatus] = useState("");
+  const submittingRef = useRef(false);
+  const [status, setStatus] = useState(INITIAL_STATUS);
+
+  const rejectSubmission = (message, field) => {
+    setStatus(errorStatus(message));
+    field?.focus();
+  };
 
   const submit = async (event) => {
     event.preventDefault();
     const form = formRef.current;
 
-    // Honeypot: bots fill hidden fields — silently accept and drop.
-    if (form.company_website && form.company_website.value) {
-      setStatus("Message sent — I’ll be in touch soon.");
-      form.reset();
-      return;
-    }
+    if (!form || submittingRef.current) return;
 
-    // Timing check: real humans take a few seconds to fill the form.
-    if (Date.now() - mountedAt.current < 2500) {
-      setStatus("Please take a moment, then send your message.");
+    if (form.company_website?.value) {
+      rejectSubmission("Message could not be sent. Please refresh the page and try again.");
       return;
     }
 
     const name = form.user_name.value.trim();
     const email = form.user_email.value.trim();
     const message = form.message.value.trim();
-
     if (name.length < 2 || name.length > 80) {
-      setStatus("Please enter your name (2–80 characters).");
+      rejectSubmission("Please enter your name (2–80 characters).", form.user_name);
       return;
     }
     if (!EMAIL_RE.test(email) || email.length > 120) {
-      setStatus("Please enter a valid email address.");
+      rejectSubmission("Please enter a valid email address.", form.user_email);
       return;
     }
     if (message.length < 10 || message.length > 1500) {
-      setStatus("Your message should be between 10 and 1500 characters.");
+      rejectSubmission("Your message should be between 10 and 1500 characters.", form.message);
       return;
     }
+
+    form.user_name.value = name;
+    form.user_email.value = email;
+    form.message.value = message;
 
     const service = process.env.REACT_APP_EMAILJS_SERVICE_ID;
     const template = process.env.REACT_APP_EMAILJS_TEMPLATE_ID;
-    const key = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
-    if (!service || !template || !key) {
-      setStatus("Add EmailJS keys in frontend/.env to activate this form.");
+    const publicKey = process.env.REACT_APP_EMAILJS_PUBLIC_KEY;
+    if (!service || !template || !publicKey) {
+      rejectSubmission(`Message delivery is not configured yet. Please email me at ${PROFILE.email}.`);
       return;
     }
 
-    setStatus("sending");
+    submittingRef.current = true;
+    setStatus({ type: "sending", message: "Transmitting your message…" });
     try {
-      await emailjs.sendForm(service, template, form, { publicKey: key });
-      setStatus("Message sent — I’ll be in touch soon.");
+      const response = await emailjs.sendForm(service, template, form, { publicKey });
+      if (response.status !== EMAILJS_OK) throw response;
+
+      setStatus({ type: "success", message: "Message sent — I’ll be in touch soon." });
       form.reset();
-    } catch {
-      setStatus(GENERIC_ERROR);
+    } catch (error) {
+      const message = error?.status === 429
+        ? "Too many attempts. Please wait a moment and try again."
+        : `Message could not be sent. Please try again or email me at ${PROFILE.email}.`;
+      setStatus(errorStatus(message));
+    } finally {
+      submittingRef.current = false;
     }
   };
 
+  const isSending = status.type === "sending";
+
   return (
-    <section id="contact" className="section contact-section" data-testid="contact-section">
-      <motion.div className="container contact-grid" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
-        <motion.div variants={fadeUp}>
-          <SectionHeading index="07 / contact" compact>Let’s build<br /><span>what’s next.</span></SectionHeading>
-          <p className="contact-copy">Open to conversations about Java, Cloud, DevOps, and the opportunities in between.</p>
-          <div className="contact-details">
-            <a href="mailto:alokkumawat2004@gmail.com" data-testid="email-link"><Mail size={17} /> alokkumawat2004@gmail.com</a>
-            <a href="tel:+919782216089" data-testid="phone-link"><Phone size={17} /> +91 9782216089</a>
-            <span data-testid="location-detail"><MapPin size={17} /> Jaipur, Rajasthan, India</span>
-          </div>
-          <div className="socials">
-            <a href="https://www.linkedin.com/in/alok-kumawat-342511250/" target="_blank" rel="noreferrer" data-testid="linkedin-link"><Linkedin size={18} /></a>
-            <a href="https://github.com/alokkumawat003" target="_blank" rel="noreferrer" data-testid="github-link"><Github size={18} /></a>
-          </div>
-        </motion.div>
-        <motion.form className="contact-form" variants={fadeUp} ref={formRef} onSubmit={submit} noValidate data-testid="contact-form">
-          <label>Your name<input name="user_name" required minLength={2} maxLength={80} placeholder="How should I call you?" data-testid="contact-name-input" /></label>
-          <label>Your email<input name="user_email" type="email" required maxLength={120} placeholder="you@company.com" data-testid="contact-email-input" /></label>
-          <label>Message<textarea name="message" required minLength={10} maxLength={1500} rows="4" placeholder="Tell me a little about the opportunity..." data-testid="contact-message-input" /></label>
-          {/* Honeypot — hidden from humans, catches bots */}
-          <input className="hp-field" type="text" name="company_website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
-          <Magnetic as="button" className="button button-primary submit-button" type="submit" disabled={status === "sending"} data-testid="contact-submit-button">
-            {status === "sending" ? "Sending..." : <>Send message <Send size={15} /></>}
-          </Magnetic>
-          {status && <p className={`form-status ${status.startsWith("Message") ? "success" : ""}`} role="status" data-testid="contact-form-status">{status}</p>}
-        </motion.form>
-      </motion.div>
+    <section id="contact" className="chapter contact-runtime" data-testid="contact-section">
+      <div className="chapter-frame container">
+        <ChapterHeading
+          number="07"
+          eyebrow="Open channel / direct"
+          description="Open to full-time opportunities and conversations about Java, Cloud, DevOps, and practical software systems."
+        >Initialize<br />a conversation.</ChapterHeading>
+
+        <div className="contact-layout">
+          <motion.div className="contact-channel" variants={stagger} initial="hidden" whileInView="show" viewport={viewportOnce}>
+            <motion.p variants={reveal}>DIRECT COORDINATES / VERIFIED</motion.p>
+            <motion.a variants={reveal} href={`mailto:${PROFILE.email}`} data-testid="email-link"><Mail size={17} /><span>{PROFILE.email}</span><ArrowUpRight /></motion.a>
+            <motion.a variants={reveal} href={PROFILE.phoneHref} data-testid="phone-link"><Phone size={17} /><span>{PROFILE.phoneDisplay}</span><ArrowUpRight /></motion.a>
+            <motion.div variants={reveal} data-testid="location-detail"><MapPin size={17} /><span>{PROFILE.location}</span></motion.div>
+            <motion.div className="contact-socials" variants={reveal}>
+              <a href={PROFILE.linkedin} target="_blank" rel="noreferrer" aria-label="Alok Kumawat on LinkedIn" data-testid="linkedin-link"><Linkedin size={18} /> LinkedIn</a>
+              <a href={PROFILE.github} target="_blank" rel="noreferrer" aria-label="Alok Kumawat on GitHub" data-testid="github-link"><Github size={18} /> GitHub</a>
+            </motion.div>
+          </motion.div>
+
+          <motion.form
+            className="contact-form ph-no-capture"
+            ref={formRef}
+            onSubmit={submit}
+            noValidate
+            aria-busy={isSending}
+            variants={stagger}
+            initial="hidden"
+            whileInView="show"
+            viewport={viewportOnce}
+            data-testid="contact-form"
+          >
+            <motion.label variants={reveal}><span>01 / Your name</span><input name="user_name" required minLength={2} maxLength={80} placeholder="How should I call you?" data-testid="contact-name-input" /></motion.label>
+            <motion.label variants={reveal}><span>02 / Your email</span><input name="user_email" type="email" required maxLength={120} placeholder="you@company.com" data-testid="contact-email-input" /></motion.label>
+            <motion.label variants={reveal}><span>03 / Message</span><textarea name="message" required minLength={10} maxLength={1500} rows="4" placeholder="Tell me a little about the opportunity..." data-testid="contact-message-input" /></motion.label>
+            <input className="hp-field" type="text" name="company_website" tabIndex={-1} autoComplete="off" aria-hidden="true" />
+            <motion.div variants={reveal}>
+              <Magnetic as="button" className="runtime-action is-primary submit-action" type="submit" disabled={isSending} aria-disabled={isSending} data-testid="contact-submit-button">
+                {isSending ? "TRANSMITTING..." : <>TRANSMIT MESSAGE <Send size={16} /></>}
+              </Magnetic>
+            </motion.div>
+            {status.message ? (
+              <p
+                className={`form-status ${status.type === "success" ? "is-success" : ""}`}
+                role={status.type === "error" ? "alert" : "status"}
+                aria-live={status.type === "error" ? "assertive" : "polite"}
+                data-testid="contact-form-status"
+              >
+                {status.message}
+              </p>
+            ) : null}
+          </motion.form>
+        </div>
+      </div>
     </section>
   );
 }

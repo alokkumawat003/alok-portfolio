@@ -2,51 +2,93 @@ import { useEffect, useRef, useState } from "react";
 import { motion, useReducedMotion } from "framer-motion";
 
 export const EASE = [0.16, 1, 0.3, 1];
+export const viewportOnce = { once: true, amount: 0.16 };
 
-export const useHoverCapable = () => {
-  const [capable, setCapable] = useState(false);
+export const useMediaQuery = (query) => {
+  const [matches, setMatches] = useState(() => typeof window !== "undefined" && window.matchMedia(query).matches);
   useEffect(() => {
-    const mq = window.matchMedia("(hover: hover) and (pointer: fine)");
-    const update = () => setCapable(mq.matches);
+    const media = window.matchMedia(query);
+    const update = () => setMatches(media.matches);
     update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return capable;
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, [query]);
+  return matches;
 };
 
-export const staggerParent = { hidden: {}, show: { transition: { staggerChildren: 0.09, delayChildren: 0.06 } } };
-export const fadeUp = { hidden: { opacity: 0, y: 34 }, show: { opacity: 1, y: 0, transition: { duration: 0.75, ease: EASE } } };
-export const viewportOnce = { once: true, amount: 0.18 };
+export const useHoverCapable = () => useMediaQuery("(hover: hover) and (pointer: fine)");
 
-export function SectionHeading({ index, compact, children }) {
+export const reveal = {
+  hidden: { opacity: 0, y: 28, rotateX: -5 },
+  show: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.78, ease: EASE } },
+};
+
+export const stagger = {
+  hidden: {},
+  show: { transition: { staggerChildren: 0.075, delayChildren: 0.06 } },
+};
+
+export function ChapterHeading({ number, eyebrow, children, description, align = "left" }) {
   return (
-    <motion.div className={`section-heading ${compact ? "compact" : ""}`} variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
-      <motion.p className="section-index" variants={fadeUp}>{index}</motion.p>
-      <motion.h2 variants={fadeUp}>{children}</motion.h2>
-      <motion.span className="heading-line" initial={{ scaleX: 0 }} whileInView={{ scaleX: 1 }} viewport={viewportOnce} transition={{ duration: 0.9, ease: EASE, delay: 0.3 }} />
-    </motion.div>
+    <motion.header
+      className={`chapter-heading is-${align}`}
+      variants={stagger}
+      initial="hidden"
+      whileInView="show"
+      viewport={viewportOnce}
+    >
+      <motion.div className="chapter-coordinate" variants={reveal}>
+        <span>{number}</span>
+        <i />
+        <span>{eyebrow}</span>
+      </motion.div>
+      <motion.h2 variants={reveal}>{children}</motion.h2>
+      {description ? <motion.p variants={reveal}>{description}</motion.p> : null}
+    </motion.header>
   );
 }
 
-export function Magnetic({ as = "a", className = "", children, strength = 0.22, ...rest }) {
+export function Magnetic({ as = "a", className = "", children, strength = 0.14, ...rest }) {
   const ref = useRef(null);
-  const capable = useHoverCapable();
+  const frame = useRef(0);
+  const hoverCapable = useHoverCapable();
   const reduce = useReducedMotion();
-  const enabled = capable && !reduce;
-  const Comp = as;
-  const onMove = (e) => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    el.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * strength}px, ${(e.clientY - r.top - r.height / 2) * strength}px)`;
-    el.style.setProperty("--gx", `${e.clientX - r.left}px`);
-    el.style.setProperty("--gy", `${e.clientY - r.top}px`);
+  const enabled = hoverCapable && !reduce;
+  const Component = as;
+
+  const onMove = (event) => {
+    const element = ref.current;
+    if (!element) return;
+    const bounds = element.getBoundingClientRect();
+    const x = event.clientX - bounds.left;
+    const y = event.clientY - bounds.top;
+    window.cancelAnimationFrame(frame.current);
+    frame.current = window.requestAnimationFrame(() => {
+      element.style.setProperty("--magnet-x", `${(x - bounds.width / 2) * strength}px`);
+      element.style.setProperty("--magnet-y", `${(y - bounds.height / 2) * strength}px`);
+      element.style.setProperty("--glow-x", `${x}px`);
+      element.style.setProperty("--glow-y", `${y}px`);
+    });
   };
-  const onLeave = () => { if (ref.current) ref.current.style.transform = ""; };
+
+  const onLeave = () => {
+    const element = ref.current;
+    if (!element) return;
+    element.style.setProperty("--magnet-x", "0px");
+    element.style.setProperty("--magnet-y", "0px");
+  };
+
+  useEffect(() => () => window.cancelAnimationFrame(frame.current), []);
+
   return (
-    <Comp ref={ref} className={`magnetic ${className}`} onMouseMove={enabled ? onMove : undefined} onMouseLeave={enabled ? onLeave : undefined} {...rest}>
+    <Component
+      ref={ref}
+      className={`magnetic ${className}`}
+      onPointerMove={enabled ? onMove : undefined}
+      onPointerLeave={enabled ? onLeave : undefined}
+      {...rest}
+    >
       {children}
-    </Comp>
+    </Component>
   );
 }

@@ -1,96 +1,187 @@
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Menu, Moon, Sun, X } from "lucide-react";
+import { ArrowDownToLine, ArrowUpRight } from "lucide-react";
+import { NAV_ITEMS, PROFILE } from "@/data/portfolio";
+import usePerformanceProfile from "@/hooks/usePerformanceProfile";
 import { EASE } from "@/motionKit";
 
-const links = ["about", "skills", "experience", "projects", "contact"];
+const ROUTE_CODES = ["00", "01", "02", "03", "04", "05"];
+const QUALITY_OPTIONS = ["high", "medium", "saver"];
+const ROUTES = [{ id: "top", label: "Home" }, ...NAV_ITEMS];
+const QUALITY_STORAGE_KEY = "ak-graphics-mode-v1";
 
-export default function Navbar({ lightMode, onToggleTheme }) {
+const normalizeQuality = (tier) => {
+  if (tier === "high") return "high";
+  if (tier === "medium") return "medium";
+  return "saver";
+};
+
+export default function Navbar() {
+  const profile = usePerformanceProfile();
   const [open, setOpen] = useState(false);
-  const [active, setActive] = useState("about");
-  const [scrolled, setScrolled] = useState(false);
+  const [active, setActive] = useState("top");
+  const [quality, setQuality] = useState(() => {
+    try {
+      const stored = window.localStorage.getItem(QUALITY_STORAGE_KEY);
+      return QUALITY_OPTIONS.includes(stored) ? stored : normalizeQuality(profile.tier);
+    } catch {
+      return normalizeQuality(profile.tier);
+    }
+  });
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 40);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    document.documentElement.dataset.graphics = quality;
+    try {
+      window.localStorage.setItem(QUALITY_STORAGE_KEY, quality);
+    } catch {
+      // Storage can be unavailable in hardened browsing modes; the live setting still applies.
+    }
+  }, [quality]);
 
   useEffect(() => {
     const observer = new IntersectionObserver((entries) => {
-      const visible = entries.find((entry) => entry.isIntersecting);
+      const visible = entries
+        .filter((entry) => entry.isIntersecting)
+        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (visible) setActive(visible.target.id);
-    }, { rootMargin: "-30% 0px -60%" });
+    }, { rootMargin: "-28% 0px -58%", threshold: [0, 0.12, 0.35] });
+
     const observed = new Set();
-    const tryObserve = () => links.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el && !observed.has(id)) { observed.add(id); observer.observe(el); }
-    });
-    tryObserve();
-    const timer = setInterval(() => { tryObserve(); if (observed.size === links.length) clearInterval(timer); }, 700);
-    return () => { clearInterval(timer); observer.disconnect(); };
+    const observeRoutes = () => {
+      ROUTES.forEach(({ id }) => {
+        const section = document.getElementById(id);
+        if (section && !observed.has(section)) {
+          observed.add(section);
+          observer.observe(section);
+        }
+      });
+    };
+
+    observeRoutes();
+    const contentObserver = new MutationObserver(observeRoutes);
+    const main = document.querySelector("main");
+    if (main) contentObserver.observe(main, { childList: true, subtree: true });
+    return () => {
+      contentObserver.disconnect();
+      observer.disconnect();
+    };
   }, []);
 
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
-    return () => { document.body.style.overflow = ""; };
-  }, [open]);
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, []);
 
   const goTo = (id) => {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth" });
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
     setOpen(false);
   };
 
+  const currentIndex = Math.max(0, ROUTES.findIndex((route) => route.id === active));
+  const currentRoute = ROUTES[currentIndex];
+
   return (
-    <header data-testid="site-navbar">
-      <div className="nav-float-wrap">
-        <motion.nav
-          className={`nav-pill-bar ${scrolled ? "shrunk" : ""}`}
-          aria-label="Main navigation"
-          initial={{ y: -26, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 1.35, duration: 0.7, ease: EASE }}
-        >
-          <button className="brand" onClick={() => goTo("top")} data-testid="brand-home-button">Alok<span>.</span></button>
-          <div className="nav-links" data-testid="navigation-links">
-            {links.map((link) => (
-              <button key={link} className={active === link ? "active" : ""} onClick={() => goTo(link)} data-testid={`nav-${link}-button`}>
-                {active === link && <motion.span layoutId="nav-active-pill" className="nav-active-pill" transition={{ type: "spring", stiffness: 380, damping: 32 }} />}
-                <span>{link}</span>
-              </button>
-            ))}
-          </div>
-          <div className="nav-actions">
-            <button className="icon-button" onClick={onToggleTheme} aria-label="Toggle light mode" data-testid="theme-toggle-button">
-              {lightMode ? <Moon size={17} /> : <Sun size={17} />}
-            </button>
-            <button className="menu-button icon-button" onClick={() => setOpen((value) => !value)} aria-label="Toggle menu" data-testid="mobile-menu-button">
-              {open ? <X size={19} /> : <Menu size={19} />}
-            </button>
-          </div>
-        </motion.nav>
+    <header className={`runtime-nav ${active === "top" ? "is-hero-route" : "is-content-route"}`} data-testid="site-navbar">
+      <button className="runtime-brand" onClick={() => goTo("top")} aria-label="Back to home" data-testid="brand-home-button">
+        <span className="runtime-brand-mark">AK</span>
+        <span className="runtime-brand-copy"><b>Alok Kumawat</b><small>DEV NODE // PORTFOLIO.2026</small></span>
+      </button>
+
+      <div className="runtime-status" aria-label="Portfolio status">
+        <span><i /> AVAILABLE</span>
+        <b>JAVA / CLOUD / DEVOPS</b>
       </div>
+
+      <div className="runtime-contact-rail">
+        <span>JAIPUR / INDIA</span>
+        <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
+      </div>
+
       <AnimatePresence>
-        {open && (
-          <motion.div className="menu-overlay" data-testid="mobile-drawer" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35, ease: EASE }}>
-            {links.map((link, index) => (
-              <motion.button
-                key={link}
-                className={`overlay-link ${active === link ? "active" : ""}`}
-                onClick={() => goTo(link)}
-                initial={{ opacity: 0, y: 44 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 20 }}
-                transition={{ delay: 0.06 + index * 0.07, duration: 0.55, ease: EASE }}
-                data-testid={`mobile-nav-${link}-button`}
-              >
-                <i>0{index + 1}</i>{link}
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
+        {open ? (
+          <motion.button
+            type="button"
+            className="route-scrim"
+            aria-label="Close navigation"
+            onClick={() => setOpen(false)}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          />
+        ) : null}
       </AnimatePresence>
+
+      <div className={`route-console ${open ? "is-open" : ""}`}>
+        <AnimatePresence>
+          {open ? (
+            <motion.div
+              className="route-directory"
+              id="route-directory"
+              initial={{ opacity: 0, y: 20, clipPath: "inset(100% 0 0 0)" }}
+              animate={{ opacity: 1, y: 0, clipPath: "inset(0% 0 0 0)" }}
+              exit={{ opacity: 0, y: 12, clipPath: "inset(100% 0 0 0)" }}
+              transition={{ duration: 0.48, ease: EASE }}
+            >
+              <div className="directory-head">
+                <div><strong>ROUTE DIRECTORY</strong><span>AK//RUNTIME</span></div>
+                <b>DIR</b>
+              </div>
+
+              <div className="directory-socials">
+                <a href={PROFILE.github} target="_blank" rel="noreferrer">GITHUB <ArrowUpRight size={13} /></a>
+                <a href={PROFILE.linkedin} target="_blank" rel="noreferrer">LINKEDIN <ArrowUpRight size={13} /></a>
+                <a href={PROFILE.resume} target="_blank" rel="noreferrer">RÉSUMÉ <ArrowDownToLine size={13} /></a>
+              </div>
+
+              <nav className="directory-routes" aria-label="Main navigation">
+                {ROUTES.map(({ id, label }, index) => (
+                  <button
+                    className={active === id ? "is-active" : ""}
+                    type="button"
+                    onClick={() => goTo(id)}
+                    data-testid={id === "top" ? "nav-home-button" : `nav-${id}-button`}
+                    key={id}
+                  >
+                    <span>[{ROUTE_CODES[index]}]</span><b>{label}</b><i aria-hidden="true" />
+                  </button>
+                ))}
+              </nav>
+
+              <div className="quality-control" aria-label="Motion quality">
+                <span>GRAPHICS MODE</span>
+                <div>
+                  {QUALITY_OPTIONS.map((option) => (
+                    <button
+                      type="button"
+                      className={quality === option ? "is-active" : ""}
+                      aria-pressed={quality === option}
+                      onClick={() => setQuality(option)}
+                      key={option}
+                    >{option}</button>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
+        <button
+          type="button"
+          className="route-trigger"
+          aria-expanded={open}
+          aria-controls="route-directory"
+          aria-label={open ? "Close menu" : "Open menu"}
+          onClick={() => setOpen((value) => !value)}
+          data-testid="mobile-menu-button"
+        >
+          <span>[{ROUTE_CODES[currentIndex]}]</span>
+          <b>{currentRoute.label}</b>
+          <i className="route-trigger-grid" aria-hidden="true"><em /><em /><em /><em /></i>
+        </button>
+      </div>
     </header>
   );
 }

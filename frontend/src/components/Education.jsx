@@ -1,22 +1,29 @@
 import { motion } from "framer-motion";
-import { BookOpen } from "lucide-react";
-import { fadeUp, SectionHeading, staggerParent, viewportOnce } from "@/motionKit";
-
-const education = [["2022 — 2026", "B.Tech, Computer Science and Engineering", "Poornima College of Engineering"], ["2022", "Class 12 · 72.40%", "NBF Public School"], ["2020", "Class 10 · 74.00%", "Aims Academy"]];
+import { EDUCATION } from "@/data/portfolio";
+import { ChapterHeading, reveal, stagger, viewportOnce } from "@/motionKit";
 
 export default function Education() {
   return (
-    <section id="education" className="section container education-section" data-testid="education-section">
-      <SectionHeading index="05 / education" compact>Always a<br /><span>student.</span></SectionHeading>
-      <motion.div className="education-list" variants={staggerParent} initial="hidden" whileInView="show" viewport={viewportOnce}>
-        {education.map(([year, title, school]) => (
-          <motion.div className="education-row" variants={fadeUp} key={year}>
-            <span className="education-year">{year}</span>
-            <BookOpen size={19} />
-            <div><h3>{title}</h3><p>{school}</p></div>
-          </motion.div>
-        ))}
-      </motion.div>
+    <section id="education" className="chapter education-runtime" data-testid="education-section">
+      <div className="chapter-frame container">
+        <ChapterHeading
+          number="05"
+          eyebrow="Education register"
+          description="Formal academic checkpoints supporting the engineering practice documented above."
+        >Learning record.<br />Foundation to practice.</ChapterHeading>
+
+        <motion.div className="education-register" variants={stagger} initial="hidden" whileInView="show" viewport={viewportOnce}>
+          {EDUCATION.map((item, index) => (
+            <motion.article variants={reveal} key={`${item.year}-${item.title}`}>
+              <span>[0{index + 1}]</span>
+              <p>{item.year}</p>
+              <h3>{item.title}</h3>
+              <b>{item.school}</b>
+              <i aria-hidden="true" />
+            </motion.article>
+          ))}
+        </motion.div>
+      </div>
     </section>
   );
 }

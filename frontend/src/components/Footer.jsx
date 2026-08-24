@@ -1,12 +1,17 @@
-import { ArrowUpRight } from "lucide-react";
+import { ArrowUp } from "lucide-react";
 
 export default function Footer() {
+  const backToTop = (event) => {
+    event.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
-    <footer className="footer" data-testid="site-footer">
-      <div className="container footer-inner">
+    <footer className="atlas-footer" data-testid="site-footer">
+      <div className="container atlas-footer-inner">
         <p>© 2026 Alok Kumawat</p>
-        <p>Designed &amp; built with intention <span className="footer-mark">✦</span></p>
-        <a href="#top" onClick={(e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: "smooth" }); }} data-testid="footer-top-link">Back to top <ArrowUpRight size={14} /></a>
+        <span>Java / Cloud / DevOps · Jaipur, India</span>
+        <a href="#top" onClick={backToTop} data-testid="footer-top-link">Return to origin <ArrowUp size={14} /></a>
       </div>
     </footer>
   );

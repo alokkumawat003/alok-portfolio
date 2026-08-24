@@ -1,51 +1,17 @@
-from fastapi import FastAPI, APIRouter
-from dotenv import load_dotenv
-from starlette.middleware.cors import CORSMiddleware
-from motor.motor_asyncio import AsyncIOMotorClient
-import os
-import logging
-from pathlib import Path
+"""Minimal read-only health API for the portfolio."""
+
+from fastapi import FastAPI
 
 
-ROOT_DIR = Path(__file__).parent
-load_dotenv(ROOT_DIR / '.env')
-
-# MongoDB connection
-mongo_url = os.environ['MONGO_URL']
-client = AsyncIOMotorClient(mongo_url)
-db = client[os.environ['DB_NAME']]
-
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
-api_router = APIRouter(prefix="/api")
+app = FastAPI(
+    title="Portfolio health API",
+    docs_url=None,
+    redoc_url=None,
+    openapi_url=None,
+)
 
 
-# The portfolio frontend is fully static and makes no API calls.
-# Only a read-only health endpoint is exposed; no write routes exist.
-@api_router.get("/")
-async def root():
+@app.get("/api/")
+async def health() -> dict[str, str]:
+    """Return the service health without reading external systems."""
     return {"status": "ok"}
-
-# Include the router in the main app
-app.include_router(api_router)
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_credentials=False,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
-    allow_methods=["GET"],
-    allow_headers=["Content-Type"],
-)
-
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-@app.on_event("shutdown")
-async def shutdown_db_client():
-    client.close()
