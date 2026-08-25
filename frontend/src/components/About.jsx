@@ -5,9 +5,9 @@ import { ChapterHeading, reveal, stagger, viewportOnce } from "@/motionKit";
 
 const PROFILE_ROWS = [
   ["NODE", "ALOK_KUMAWAT"],
-  ["ROLE", "JAVA_FULL_STACK"],
+  ["ROLE", "CLOUD_DEVOPS"],
   ["BASE", "JAIPUR_INDIA"],
-  ["FOCUS", "CLOUD_DEVOPS"],
+  ["FOUNDATION", "JAVA_FULL_STACK"],
 ];
 
 export default function About() {
@@ -17,13 +17,13 @@ export default function About() {
         <ChapterHeading
           number="01"
           eyebrow="Profile node / verified"
-          description="A backend-first developer building practical web systems and understanding the delivery layer beneath them."
+          description="A Cloud and DevOps-focused engineer building practical systems with a strong backend foundation."
         >Code is the entry.<br />Systems are the destination.</ChapterHeading>
 
         <div className="about-runtime-grid">
           <motion.div className="about-narrative" variants={stagger} initial="hidden" whileInView="show" viewport={viewportOnce}>
             <motion.p className="about-narrative-lead" variants={reveal}>
-              I’m <strong>Alok Kumawat</strong>, a Java Full Stack Developer whose work moves from interface logic through backend architecture to Cloud and DevOps practice.
+              I’m <strong>Alok Kumawat</strong>, a Cloud &amp; DevOps Engineer with a Java full-stack foundation, focused on the infrastructure and delivery systems behind reliable software.
             </motion.p>
             <motion.p variants={reveal}>
               My computer science foundation at Poornima College of Engineering and internships at 8Bit Systems, Anantics India, and Zeetron Networks shaped a practical way of working: understand the data, structure the application, validate the edge cases, and ship something useful.

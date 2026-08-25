@@ -86,7 +86,7 @@ export default function Contact() {
         <ChapterHeading
           number="07"
           eyebrow="Open channel / direct"
-          description="Open to full-time opportunities and conversations about Java, Cloud, DevOps, and practical software systems."
+          description="Open to full-time opportunities and conversations about Cloud, DevOps, Java, and practical software systems."
         >Initialize<br />a conversation.</ChapterHeading>
 
         <div className="contact-layout">

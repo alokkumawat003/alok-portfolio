@@ -675,6 +675,7 @@
 .machine-core small,
 .machine-core span { color: var(--dim); font: 600 0.46rem/1 var(--mono); letter-spacing: 0.07em; }
 .machine-core strong { margin-block: 8px; font: 700 clamp(2.1rem, 4.3vw, 4.5rem)/0.85 var(--display); letter-spacing: -0.05em; }
+.machine-core .machine-domain { font-size: clamp(1.45rem, 2.7vw, 2.8rem); line-height: 0.84; text-align: center; white-space: nowrap; }
 .machine-core span { color: var(--signal); }
 
 .machine-sidecar {

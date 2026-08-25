@@ -4,7 +4,7 @@ import { ArrowDown, ArrowUpRight, Download } from "lucide-react";
 import { PROFILE } from "@/data/portfolio";
 import { EASE, Magnetic, useHoverCapable } from "@/motionKit";
 
-const STACK_NODES = ["JAVA", "SPRING BOOT", "MYSQL", "AWS", "GIT", "REST API"];
+const STACK_NODES = ["AWS", "DEVOPS", "GIT", "JAVA", "SPRING BOOT", "MYSQL"];
 
 function StackMachine({ machineRef }) {
   return (
@@ -17,9 +17,9 @@ function StackMachine({ machineRef }) {
         <span className="machine-spine spine-x" />
         <span className="machine-spine spine-y" />
         <div className="machine-core">
-          <small>PRIMARY RUNTIME</small>
-          <strong>JAVA</strong>
-          <span>FULL_STACK / ACTIVE</span>
+          <small>PRIMARY DOMAIN</small>
+          <strong className="machine-domain">CLOUD<br />&amp; DEVOPS</strong>
+          <span>INFRASTRUCTURE / ACTIVE</span>
         </div>
         <div className="machine-sidecar"><i>AK</i><span>BUILD<br />SYSTEMS</span></div>
         {STACK_NODES.map((node, index) => <b className={`machine-node node-${index + 1}`} key={node}>{node}</b>)}
@@ -85,7 +85,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5, duration: 0.7, ease: EASE }}
-        >[ JAVA FULL STACK DEVELOPER ]</motion.p>
+        >[ CLOUD &amp; DEVOPS ENGINEER ]</motion.p>
         <h1 data-testid="hero-heading" aria-label="Alok Kumawat">
           <motion.span initial={{ y: "110%" }} animate={{ y: 0 }} transition={{ delay: 0.12, duration: 1, ease: EASE }}>ALOK</motion.span>
           <motion.span initial={{ y: "110%" }} animate={{ y: 0 }} transition={{ delay: 0.22, duration: 1, ease: EASE }}>KUMAWAT</motion.span>
@@ -99,7 +99,7 @@ export default function Hero() {
         transition={{ delay: 0.72, duration: 0.8, ease: EASE }}
       >
         <span>[ INFO_LOG ]</span>
-        <p data-testid="hero-intro">I build Java-backed web systems with Spring Boot, MySQL, REST APIs, Cloud, and DevOps foundations.</p>
+        <p data-testid="hero-intro">I build cloud-ready systems by combining AWS and DevOps practices with a Java, Spring Boot, MySQL, and REST API foundation.</p>
       </motion.div>
 
       <motion.dl

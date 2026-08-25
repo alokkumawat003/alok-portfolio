@@ -2,7 +2,7 @@ export const PROFILE = {
   name: "Alok Kumawat",
   location: "Jaipur, Rajasthan, India",
   shortLocation: "Jaipur, India",
-  title: "Java Full Stack Developer",
+  title: "Cloud & DevOps Engineer",
   direction: "Cloud & DevOps",
   email: "alokkumawat2004@gmail.com",
   phoneDisplay: "+91 9782216089",

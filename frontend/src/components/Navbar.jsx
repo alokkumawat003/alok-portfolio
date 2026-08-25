@@ -92,7 +92,7 @@ export default function Navbar() {
 
       <div className="runtime-status" aria-label="Portfolio status">
         <span><i /> AVAILABLE</span>
-        <b>JAVA / CLOUD / DEVOPS</b>
+        <b>CLOUD / DEVOPS / JAVA</b>
       </div>
 
       <div className="runtime-contact-rail">
