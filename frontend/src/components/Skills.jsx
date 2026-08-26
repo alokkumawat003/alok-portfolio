@@ -13,7 +13,7 @@ const INDEXED_GROUPS = SKILL_GROUPS.map((group) => ({
 
 export default function Skills() {
   return (
-    <section id="skills" className="chapter skills-runtime" data-testid="skills-section">
+    <section id="skills" className="chapter skills-runtime" data-scene="skills" data-testid="skills-section">
       <div className="chapter-frame container">
         <ChapterHeading
           number="02"

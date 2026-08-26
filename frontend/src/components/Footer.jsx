@@ -7,7 +7,7 @@ export default function Footer() {
   };
 
   return (
-    <footer className="atlas-footer" data-testid="site-footer">
+    <footer id="footer" className="atlas-footer" data-scene="footer" data-testid="site-footer">
       <div className="container atlas-footer-inner">
         <p>© 2026 Alok Kumawat</p>
         <span>Cloud / DevOps / Java · Jaipur, India</span>

@@ -1,11 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
+import usePerformanceProfile from "@/hooks/usePerformanceProfile";
 import { useHoverCapable } from "@/motionKit";
 
 export default function CustomCursor() {
   const hoverCapable = useHoverCapable();
+  const profile = usePerformanceProfile();
   const reduced = useReducedMotion();
-  const enabled = hoverCapable && !reduced;
+  const enabled = hoverCapable && !reduced && profile.tier === "high";
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
   const smoothX = useSpring(x, { stiffness: 220, damping: 26, mass: 0.32 });

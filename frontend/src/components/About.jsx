@@ -12,7 +12,7 @@ const PROFILE_ROWS = [
 
 export default function About() {
   return (
-    <section id="about" className="chapter about-runtime" data-testid="about-section">
+    <section id="about" className="chapter about-runtime" data-scene="about" data-testid="about-section">
       <div className="chapter-frame container">
         <ChapterHeading
           number="01"

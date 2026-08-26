@@ -1,15 +1,16 @@
 :root {
   color-scheme: dark;
-  --ink: #050809;
-  --ink-soft: #0a1011;
-  --paper: #edf0e8;
-  --muted: #9ba49e;
-  --dim: #606a65;
-  --signal: #c7ff72;
-  --signal-soft: #9bc47b;
-  --copper: #c68b63;
-  --line: rgba(226, 235, 225, 0.14);
-  --line-strong: rgba(226, 235, 225, 0.28);
+  --ink: #03070a;
+  --ink-soft: #071116;
+  --paper: #e2ebe6;
+  --muted: #91a0a3;
+  --dim: #596a70;
+  --signal: #b8ff65;
+  --signal-soft: #87c977;
+  --cyan: #70e7f0;
+  --ember: #ff6b45;
+  --line: rgba(193, 224, 225, 0.14);
+  --line-strong: rgba(193, 224, 225, 0.3);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --mono: "Cascadia Mono", "SFMono-Regular", Consolas, monospace;
   --sans: "Aptos", "Segoe UI Variable", "Helvetica Neue", Arial, sans-serif;
@@ -27,6 +28,11 @@ html {
   overflow-x: clip;
   scroll-behavior: smooth;
   background: var(--ink);
+}
+
+html.menu-open,
+html.menu-open body {
+  overflow: hidden;
 }
 
 body,

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ArrowDownToLine, ArrowUpRight } from "lucide-react";
 import { NAV_ITEMS, PROFILE } from "@/data/portfolio";
@@ -6,20 +6,22 @@ import usePerformanceProfile from "@/hooks/usePerformanceProfile";
 import { EASE } from "@/motionKit";
 
 const ROUTE_CODES = ["00", "01", "02", "03", "04", "05"];
-const QUALITY_OPTIONS = ["high", "medium", "saver"];
-const ROUTES = [{ id: "top", label: "Home" }, ...NAV_ITEMS];
-const QUALITY_STORAGE_KEY = "ak-graphics-mode-v1";
+const QUALITY_OPTIONS = ["high", "medium", "low"];
+const ROUTES = [{ id: "top", label: "Home" }, ...NAV_ITEMS, { id: "footer", label: "End" }];
+const QUALITY_STORAGE_KEY = "ak-graphics-mode-v2";
 
 const normalizeQuality = (tier) => {
   if (tier === "high") return "high";
   if (tier === "medium") return "medium";
-  return "saver";
+  return "low";
 };
 
 export default function Navbar() {
   const profile = usePerformanceProfile();
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState("top");
+  const [hidden, setHidden] = useState(false);
+  const hiddenRef = useRef(false);
   const [quality, setQuality] = useState(() => {
     try {
       const stored = window.localStorage.getItem(QUALITY_STORAGE_KEY);
@@ -31,6 +33,7 @@ export default function Navbar() {
 
   useEffect(() => {
     document.documentElement.dataset.graphics = quality;
+    window.dispatchEvent(new CustomEvent("ak-quality-change", { detail: quality }));
     try {
       window.localStorage.setItem(QUALITY_STORAGE_KEY, quality);
     } catch {
@@ -39,33 +42,50 @@ export default function Navbar() {
   }, [quality]);
 
   useEffect(() => {
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible) setActive(visible.target.id);
-    }, { rootMargin: "-28% 0px -58%", threshold: [0, 0.12, 0.35] });
-
-    const observed = new Set();
-    const observeRoutes = () => {
-      ROUTES.forEach(({ id }) => {
+    let lastY = window.scrollY;
+    let frame = 0;
+    let routeOffsets = [];
+    const measureRoutes = () => {
+      routeOffsets = ROUTES.map(({ id }) => {
         const section = document.getElementById(id);
-        if (section && !observed.has(section)) {
-          observed.add(section);
-          observer.observe(section);
+        return section ? { id, top: section.offsetTop } : null;
+      }).filter(Boolean);
+    };
+    const updateHidden = (nextHidden) => {
+      if (hiddenRef.current === nextHidden) return;
+      hiddenRef.current = nextHidden;
+      setHidden(nextHidden);
+    };
+    const onScroll = () => {
+      window.cancelAnimationFrame(frame);
+      frame = window.requestAnimationFrame(() => {
+        const nextY = window.scrollY;
+        if (open || nextY <= window.innerHeight * 0.65 || nextY < lastY - 3) {
+          updateHidden(false);
+        } else if (nextY > lastY + 3) {
+          updateHidden(true);
         }
+        const focusLine = nextY + window.innerHeight * 0.38;
+        let nextActive = "top";
+        routeOffsets.forEach(({ id, top }) => {
+          if (top <= focusLine) nextActive = id;
+        });
+        if (nextY + window.innerHeight >= document.documentElement.scrollHeight - 4) nextActive = "footer";
+        setActive((current) => current === nextActive ? current : nextActive);
+        lastY = nextY;
       });
     };
-
-    observeRoutes();
-    const contentObserver = new MutationObserver(observeRoutes);
-    const main = document.querySelector("main");
-    if (main) contentObserver.observe(main, { childList: true, subtree: true });
+    measureRoutes();
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", measureRoutes, { passive: true });
+    document.fonts?.ready.then(measureRoutes);
     return () => {
-      contentObserver.disconnect();
-      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", measureRoutes);
     };
-  }, []);
+  }, [open]);
 
   useEffect(() => {
     const closeOnEscape = (event) => {
@@ -74,6 +94,11 @@ export default function Navbar() {
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("menu-open", open);
+    return () => document.documentElement.classList.remove("menu-open");
+  }, [open]);
 
   const goTo = (id) => {
     document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -84,21 +109,21 @@ export default function Navbar() {
   const currentRoute = ROUTES[currentIndex];
 
   return (
-    <header className={`runtime-nav ${active === "top" ? "is-hero-route" : "is-content-route"}`} data-testid="site-navbar">
+    <header className={`runtime-nav ${hidden ? "is-hidden" : ""} ${active === "top" ? "is-hero-route" : "is-content-route"}`} data-testid="site-navbar">
       <button className="runtime-brand" onClick={() => goTo("top")} aria-label="Back to home" data-testid="brand-home-button">
         <span className="runtime-brand-mark">AK</span>
-        <span className="runtime-brand-copy"><b>Alok Kumawat</b><small>DEV NODE // PORTFOLIO.2026</small></span>
+        <span className="runtime-brand-copy"><b>Alok Kumawat</b><small>INFRASTRUCTURE ENGINEER</small></span>
       </button>
 
-      <div className="runtime-status" aria-label="Portfolio status">
-        <span><i /> AVAILABLE</span>
-        <b>CLOUD / DEVOPS / JAVA</b>
-      </div>
+      <nav className="desktop-routes" aria-label="Main navigation">
+        {ROUTES.slice(0, -1).map(({ id, label }, index) => (
+          <button type="button" className={active === id ? "is-active" : ""} onClick={() => goTo(id)} key={id} data-testid={id === "top" ? "nav-home-button" : `nav-${id}-button`}>
+            <span>{String(index).padStart(2, "0")}</span>{label}
+          </button>
+        ))}
+      </nav>
 
-      <div className="runtime-contact-rail">
-        <span>JAIPUR / INDIA</span>
-        <a href={`mailto:${PROFILE.email}`}>{PROFILE.email}</a>
-      </div>
+      <a className="nav-resume" href={PROFILE.resume} target="_blank" rel="noreferrer">RÉSUMÉ <ArrowUpRight size={13} /></a>
 
       <AnimatePresence>
         {open ? (
@@ -126,7 +151,7 @@ export default function Navbar() {
               transition={{ duration: 0.48, ease: EASE }}
             >
               <div className="directory-head">
-                <div><strong>ROUTE DIRECTORY</strong><span>AK//RUNTIME</span></div>
+                <div><strong>ROUTE DIRECTORY</strong><span>AK//INFRA.WORLD</span></div>
                 <b>DIR</b>
               </div>
 
@@ -137,7 +162,7 @@ export default function Navbar() {
               </div>
 
               <nav className="directory-routes" aria-label="Main navigation">
-                {ROUTES.map(({ id, label }, index) => (
+                {ROUTES.slice(0, -1).map(({ id, label }, index) => (
                   <button
                     className={active === id ? "is-active" : ""}
                     type="button"
@@ -177,11 +202,19 @@ export default function Navbar() {
           onClick={() => setOpen((value) => !value)}
           data-testid="mobile-menu-button"
         >
-          <span>[{ROUTE_CODES[currentIndex]}]</span>
+          <span>[{String(currentIndex).padStart(2, "0")}]</span>
           <b>{currentRoute.label}</b>
           <i className="route-trigger-grid" aria-hidden="true"><em /><em /><em /><em /></i>
         </button>
       </div>
+
+      <aside className="chapter-rail" aria-label="Page chapters">
+        {ROUTES.map(({ id, label }, index) => (
+          <button type="button" className={active === id ? "is-active" : ""} aria-label={`Go to ${label}`} onClick={() => goTo(id)} key={id}>
+            <i /><span>{String(index).padStart(2, "0")}</span>
+          </button>
+        ))}
+      </aside>
     </header>
   );
 }

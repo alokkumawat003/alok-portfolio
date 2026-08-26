@@ -19,8 +19,8 @@ export const useMediaQuery = (query) => {
 export const useHoverCapable = () => useMediaQuery("(hover: hover) and (pointer: fine)");
 
 export const reveal = {
-  hidden: { opacity: 0, y: 28, rotateX: -5 },
-  show: { opacity: 1, y: 0, rotateX: 0, transition: { duration: 0.78, ease: EASE } },
+  hidden: { opacity: 0, y: 28 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.72, ease: EASE } },
 };
 
 export const stagger = {
