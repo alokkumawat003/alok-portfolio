@@ -31,7 +31,7 @@ export const SKILL_GROUPS = [
 
 export const EXPERIENCE = [
   {
-    date: "May 2025 — Present",
+    date: "May 2025 — Aug 2025",
     role: "Java Developer Intern",
     company: "8Bit Systems · Jaipur",
     points: [
